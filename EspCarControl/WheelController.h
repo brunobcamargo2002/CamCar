@@ -1,3 +1,6 @@
+#ifndef WHEEL_CONTROLLER_H
+#define WHEEL_CONTROLLER_H
+
 #include <Arduino.h>
 
 #define PWM_FREQ 9000
@@ -7,7 +10,7 @@
 enum MotorState {
   STOPPED,
   FORWARD,
-  BACKWARD
+  BACKWARD 
 };
 
 class WheelController {
@@ -34,3 +37,5 @@ class WheelController {
   public:
     ~WheelController();
 };
+
+#endif

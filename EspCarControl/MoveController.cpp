@@ -9,6 +9,11 @@ void MoveController::moveLine(MotorState motorState){
   right.setMove(motorState, 1);
 }
 
+void MoveController::setWheelsMove(MotorState leftState, float leftRPM, MotorState rightState, float rightRPM){
+  left.setMove(leftState, leftRPM);
+  right.setMove(rightState, rightRPM);
+}
+
 MoveController::~MoveController(){
   
 }

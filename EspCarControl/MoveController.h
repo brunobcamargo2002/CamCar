@@ -1,3 +1,6 @@
+#ifndef MOVE_CONTROLLER_H
+#define MOVE_CONTROLLER_H
+
 #include "WheelController.h"
 
 #define INA 12
@@ -16,7 +19,10 @@ class MoveController{
     MoveController();
 
     void moveLine(MotorState motorState);
+    void setWheelsMove(MotorState leftState, float leftRPM, MotorState rightState, float rightRPM);
 
     ~MoveController();
 
 };
+
+#endif
