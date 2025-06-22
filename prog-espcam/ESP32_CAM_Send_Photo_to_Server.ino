@@ -30,8 +30,8 @@
 #define FLASH_LED_PIN 4             
 
 //======================================== Insert your network credentials.
-const char* ssid = "Edeli Pepe";
-const char* password = "08052003";
+const char* ssid = "PC_MIYAIJI 8457";
+const char* password = "019283Th";
 //======================================== 
 
 //======================================== Variables for Timer/Millis.
@@ -40,7 +40,7 @@ const int Interval = 5000; //--> Photo capture every 20 seconds.
 //======================================== 
 
 // Server Address or Server IP.
-String serverName = "192.168.18.13";  //--> Change with your server computer's IP address or your Domain name.
+String serverName = "10.182.3.124";  //--> Change with your server computer's IP address or your Domain name.
 // The file path "upload_img.php" on the server folder.
 String serverPath = "/ESP32CAM/upload_img.php";
 // Server Port.
@@ -61,7 +61,7 @@ void sendPhotoToServer() {
 
   Serial.println();
   Serial.println("-----------");
-
+ 
   //---------------------------------------- Pre capture for accurate timing.
   Serial.println("Taking a photo...");
 
@@ -69,21 +69,21 @@ void sendPhotoToServer() {
     digitalWrite(FLASH_LED_PIN, HIGH);
     delay(1000);
   }
-
+  
   for (int i = 0; i <= 3; i++) {
     camera_fb_t * fb = NULL;
     fb = esp_camera_fb_get();
-    if(!fb) {
-      Serial.println("Camera capture failed");
-      Serial.println("Restarting the ESP32 CAM.");
-      delay(1000);
-      ESP.restart();
-      return;
-    } 
+     if(!fb) {
+        Serial.println("Camera capture failed");
+        Serial.println("Restarting the ESP32 CAM.");
+        delay(1000);
+        ESP.restart();
+        return;
+      } 
     esp_camera_fb_return(fb);
     delay(200);
   }
-
+  
   camera_fb_t * fb = NULL;
   fb = esp_camera_fb_get();
   if(!fb) {
@@ -95,7 +95,7 @@ void sendPhotoToServer() {
   } 
 
   if (LED_Flash_ON == true) digitalWrite(FLASH_LED_PIN, LOW);
-
+  
   Serial.println("Taking a photo was successful.");
   //---------------------------------------- 
 
@@ -103,22 +103,22 @@ void sendPhotoToServer() {
 
   if (client.connect(serverName.c_str(), serverPort)) {
     Serial.println("Connection successful!");   
-
+     
     String post_data = "--dataMarker\r\nContent-Disposition: form-data; name=\"imageFile\"; filename=\"ESP32CAMCap.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n";
     String head =  post_data;
     String boundary = "\r\n--dataMarker--\r\n";
-
+    
     uint32_t imageLen = fb->len;
     uint32_t dataLen = head.length() + boundary.length();
     uint32_t totalLen = imageLen + dataLen;
-
+    
     client.println("POST " + serverPath + " HTTP/1.1");
     client.println("Host: " + serverName);
     client.println("Content-Length: " + String(totalLen));
     client.println("Content-Type: multipart/form-data; boundary=dataMarker");
     client.println();
     client.print(head);
-
+  
     uint8_t *fbBuf = fb->buf;
     size_t fbLen = fb->len;
     for (size_t n=0; n<fbLen; n=n+1024) {
@@ -132,9 +132,9 @@ void sendPhotoToServer() {
       }
     }   
     client.print(boundary);
-
+    
     esp_camera_fb_return(fb);
-
+   
     int timoutTimer = 10000;
     long startTimer = millis();
     boolean state = false;
@@ -142,33 +142,25 @@ void sendPhotoToServer() {
     while ((startTimer + timoutTimer) > millis()) {
       Serial.print(".");
       delay(200);
-
+         
       // Skip HTTP headers   
       while (client.available()) {
         char c = client.read();
         if (c == '\n') {
-          if (AllData.length()==0) { 
-            state=true; 
-          }
+          if (AllData.length()==0) { state=true; }
           AllData = "";
         }
-        else if (c != '\r') { 
-          AllData += String(c); 
-        }
-        if (state==true) { 
-          DataBody += String(c); 
-        }
+        else if (c != '\r') { AllData += String(c); }
+        if (state==true) { DataBody += String(c); }
         startTimer = millis();
       }
-      if (DataBody.length()>0) { 
-        break; 
-      }
+      if (DataBody.length()>0) { break; }
     }
     client.stop();
     Serial.println(DataBody);
     Serial.println("-----------");
     Serial.println();
-
+    
   }
   else {
     client.stop();
@@ -185,7 +177,7 @@ void setup() {
 
   // Disable brownout detector.
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
-
+  
   Serial.begin(115200);
   Serial.println();
 
@@ -200,7 +192,7 @@ void setup() {
   Serial.print("Connecting to : ");
   Serial.println(ssid);
   WiFi.begin(ssid, password);
-
+  
   // The process timeout of connecting ESP32 CAM with WiFi Hotspot / WiFi Router is 20 seconds.
   // If within 20 seconds the ESP32 CAM has not been successfully connected to WiFi, the ESP32 CAM will restart.
   // I made this condition because on my ESP32-CAM, there are times when it seems like it can't connect to WiFi, so it needs to be restarted to be able to connect to WiFi.
@@ -230,7 +222,7 @@ void setup() {
   //---------------------------------------- Set the camera ESP32 CAM.
   Serial.println();
   Serial.print("Set the camera ESP32 CAM...");
-
+  
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
@@ -258,13 +250,12 @@ void setup() {
     config.frame_size = FRAMESIZE_UXGA;
     config.jpeg_quality = 10;  //--> 0-63 lower number means higher quality
     config.fb_count = 2;
-  } 
-  else {
+  } else {
     config.frame_size = FRAMESIZE_SVGA;
     config.jpeg_quality = 8;  //--> 0-63 lower number means higher quality
     config.fb_count = 1;
   }
-
+  
   // camera init
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
@@ -289,7 +280,7 @@ void setup() {
   // -QQVGA  = 160 x 120   pixels
   s->set_framesize(s, FRAMESIZE_SXGA); //--> UXGA|SXGA|XGA|SVGA|VGA|CIF|QVGA|HQVGA|QQVGA
 
-    Serial.println();
+  Serial.println();
   Serial.println("Set camera ESP32 CAM successfully.");
   //---------------------------------------- 
 
@@ -306,11 +297,10 @@ void loop() {
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= Interval) {
     previousMillis = currentMillis;
-
+    
     sendPhotoToServer();
   }
   //---------------------------------------- 
 }
 //________________________________________________________________________________ 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
