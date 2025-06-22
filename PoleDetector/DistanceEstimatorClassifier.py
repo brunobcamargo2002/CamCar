@@ -98,4 +98,30 @@ def StripeDetector(img_path):
     # Filtra contornos pela área
     filtered_contours = [c for c in contours if cv2.contourArea(c) > min_area]
 
+    ShowImageStages(img, filtered_contours, gray, thresh)
+
     return filtered_contours
+
+def ShowImageStages(img, filtered_contours, gray, thresh):
+    # Para mostrar contornos, vamos copiar a imagem original
+    img_contours = img.copy()
+    cv2.drawContours(img_contours, filtered_contours, -1, (0,255,0), 2)
+
+    # Como temos imagens em tons de cinza e coloridas, vamos converter as grayscale para BGR para concatenar
+    gray_bgr = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+    thresh_bgr = cv2.cvtColor(thresh, cv2.COLOR_GRAY2BGR)
+
+    # Agora juntamos as imagens horizontalmente
+    side_by_side = np.hstack((img, gray_bgr, thresh_bgr, img_contours))
+
+    # Ajuste a janela para caber
+    cv2.namedWindow('Etapas', cv2.WINDOW_NORMAL)
+    cv2.imshow('Etapas', side_by_side)
+    
+    #Espera fechar a janela
+    while True:
+        cv2.waitKey(100)# Espera 100ms para não travar a CPU
+        if cv2.getWindowProperty('Etapas', cv2.WND_PROP_VISIBLE) < 1:
+            break
+
+    cv2.destroyAllWindows()
