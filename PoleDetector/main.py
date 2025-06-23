@@ -1,13 +1,16 @@
-from DistanceEstimatorClassifier import DistanceEstimator, DistanceClassifier, StripeDetector
+#=========================================================================================
+#   COMANDOS PARA INICIAR SERVIDOR NO LINUX
+#   sudo /opt/lampp/lampp start
+#   sudo /opt/lampp/manager-linux-x64.run
+#=========================================================================================
+
+from DistanceEstimatorClassifier import DistanceEstimatorClassifier
 """
     ARQUIVO PARA TESTE DAS FUNÇÕES
 """
-path = r"TestPhotos/6.jpeg"
+path = r"/opt/lampp/htdocs/ESP32CAM/captured_images/ESP32CAMCap.jpg"
 
-filtered_contours = StripeDetector(path)
-
-distance = DistanceEstimator(filtered_contours)
-thickness = DistanceClassifier(filtered_contours)
+distance, thickness =  DistanceEstimatorClassifier(path)
 
 if distance == None:
     print("ERRO - Main - Não foi possível calcular a distância.")
