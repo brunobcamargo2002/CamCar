@@ -1,15 +1,24 @@
 import cv2
 import numpy as np
 
+"""
+================ESTATÍSTICAS==================================================
+ERRO DA DISTÂNCIA       = 3%(LONGE - 50 cm) - 10%(MEDIO - 50/40cm) - 30%(PERTO - 30 cm)
+ERRO DA CLASSIFICAÇÃO   = 0%
+PRINCIPAL FONTE DE ERRO = COISAS PRETAS(SOMBRA PRINCIPALMENTE) PERTO DO POSTE
+E ILUMINAÇÃO
+==============================================================================
+"""
+
 #========Parametros de Calibração(MAIS FREQUENTES)==========
-LIMIAR              = 50    #ELIMINAR RUIDO                 #(int): Valor de threshold para binarização (padrão: 55).
+LIMIAR              = 45    #ELIMINAR RUIDO                 #(int): Valor de threshold para binarização (padrão: 55).
 FOCAL_LENGTH_PX     = 1600  #CORREÇÃO CALCULO DISTÂNCIA     #(float): Distância focal da câmera em pixels (ajustada por calibração).    
 #========Parametros de Calibração(MENOS FREQUENTES)=========
-WINDOW_SIZE         = 15    #UNIR FAIXA                     #(int): Largura do lado da janela quadrada para fazer o fechamento morfologico.
+WINDOW_SIZE         = 25    #UNIR FAIXA                     #(int): Largura do lado da janela quadrada para fazer o fechamento morfologico.
 MIN_AREA            = 500   #ELIMINAR RUIDO                 #(float): Área mínima para considerar um contorno válido (padrão: 500).
 MAX_RATIO           = 1.0   #ELIMINAR RUIDO                 #(float): Proporção máxima entre altura e largura para considerar um contorno válido.
 MAX_X_DISTANCE      = 50    #ELIMINAR RUIDO                 #(float): Distância maxima entre os Xs centrais do agrupamento.
-ONE_STRIP_RATIO     = 0.23  #CLASSIFICAÇÃO ESPESSURA        #(int): Limite inferior de proporção para classificar como '1 faixas'
+ONE_STRIP_RATIO     = 0.25  #CLASSIFICAÇÃO ESPESSURA        #(int): Limite inferior de proporção para classificar como '1 faixas'
 THREE_STRIP_RATIO   = 0.43  #CLASSIFICAÇÃO ESPESSURA        #(int): Limite superior de proporção para classificar como '2 faixas'
 #===========================================================
 #RATIO = Y / X
@@ -19,9 +28,6 @@ ONE_BANDS_NUMBER        = 10   #CARACTERISTICA POSTE       #Numero de faixas do 
 TWO_BANDS_NUMBER        =  8   #CARACTERISTICA POSTE       #Numero de faixas do poste de espessura 2
 THREE_BANDS_NUMBER      =  7   #CARACTERISTICA POSTE       #Numero de faixas do poste de espessura 3
 #===========================================================
-
-#testar em diagonal
-#testar porcentagem de erro
 
 def DistanceEstimatorClassifier(path):
     #=========================================
@@ -39,14 +45,22 @@ def DistanceEstimatorClassifier(path):
         thickness (str): Classificação da espessura das listras.
     """
 
-    filtered_contours = StripeDetector(path)
+    filtered_contours = StripeDetector(path, ShowImageFlag = False)
 
-    thickness = DistanceClassifier(filtered_contours)
-    distance = DistanceEstimator(filtered_contours, thickness)
+    thickness, average_ratio= DistanceClassifier(filtered_contours)
 
-    return distance, thickness
+    result = DistanceEstimator(filtered_contours, thickness)
+    if result is None:
+       distance, captured_bands_nunber = None, 0
+    else:
+       distance, captured_bands_nunber = result
 
-def StripeDetector(img_path):
+    #Printo no terminal o resultado
+    Log(distance, thickness, captured_bands_nunber, average_ratio)
+
+    return distance, thickness, average_ratio
+
+def StripeDetector(img_path, ShowImageFlag = False):
     """
     Detecta listras pretas em uma imagem e retorna os contornos filtrados.
 
@@ -81,7 +95,8 @@ def StripeDetector(img_path):
     filtered_contours, candidate_contours = ContoursFilter(contours)
 
     #Mostra etapa das filtragens
-    ShowImageStages(img_rotated, filtered_contours, candidate_contours, gray, thresh)
+    if ShowImageFlag:
+        ShowImageStages(img_rotated, filtered_contours, candidate_contours, gray, thresh)
 
     return filtered_contours
 
@@ -195,9 +210,10 @@ def ShowImageStages(img, filtered_contours, candidate_contours, gray, thresh):
     # Para mostrar contornos, vamos copiar a imagem original
     img_candidate_contours = img.copy()
     img_filtered_contours = img.copy()
-    contours_only = [ c for c, r in filtered_contours]
-    cv2.drawContours(img_candidate_contours, contours_only, -1, (0,255,0), 2)
-    cv2.drawContours(img_filtered_contours, contours_only, -1, (0,255,0), 2)
+    candidate_contours_only = [ c for x, c, r in candidate_contours]
+    filtered_contours_only = [ c for c, r in filtered_contours]
+    cv2.drawContours(img_candidate_contours, candidate_contours_only, -1, (0,255,0), 2)
+    cv2.drawContours(img_filtered_contours, filtered_contours_only, -1, (0,255,0), 2)
 
     # Como temos imagens em tons de cinza e coloridas, vamos converter as grayscale para BGR para concatenar
     gray_bgr = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
@@ -255,7 +271,6 @@ def DistanceEstimator(filtered_contours, thickness):
 
         #Cacula altura ralativa caso o poste não apareca totalmente.
         captured_bands_nunber = len(filtered_contours)
-        print(f"Faixas identificadas: {captured_bands_nunber:.2f}")
         real_height_cm =  (captured_bands_nunber/real_bands_number) * initial_real_height_cm
 
         # Encontra top e bottom Y das listras
@@ -269,7 +284,7 @@ def DistanceEstimator(filtered_contours, thickness):
         # distância = (altura_real * focal) / altura_aparente
         distance_cm = (real_height_cm * focal_length_px) / height_pixels
 
-        return distance_cm
+        return distance_cm, captured_bands_nunber
 
 def DistanceClassifier(filtered_contours):
     """
@@ -290,7 +305,7 @@ def DistanceClassifier(filtered_contours):
 
     if len(filtered_contours) == 0:
         print("ERRO - DistanceClassifier - Nenhuma faixa detectada.")
-        return None #Nenhuma faixa detectada.
+        return None, None #Nenhuma faixa detectada.
 
     # Obtem as proporções entre altura e largura das faixas.
     ratios = [r for c, r in filtered_contours]  # h = altura da faixa
@@ -299,8 +314,20 @@ def DistanceClassifier(filtered_contours):
 
     # Classificação com base em limites definidos.
     if average_ratio < one_strip_ratio:
-        return 1 #1 faixas
+        return 1, average_ratio #1 faixas
     elif average_ratio >= three_strip_ratio:
-        return 3 #3 faixas
+        return 3, average_ratio #3 faixas
     else:
-        return 2 #2 faixas
+        return 2, average_ratio #2 faixas
+
+def Log(distance, thickness, captured_bands_nunber, average_ratio):
+    print("============================================================")
+    print(f"Faixas identificadas: {captured_bands_nunber:.2f} faixas")
+    if distance == None:
+        print("ERRO - Main - Não foi possível calcular a distância.")
+    elif thickness == None:
+        print("ERRO - Main - Não foi possível calcular o número de faixas.")
+    elif average_ratio == None:
+        print("ERRO - Main - Não foi possível calcular a proporção.")
+    else:
+        print(f"Proporção Média das Faixas: {average_ratio:.2f}\nEspessura das faixas: {thickness:.2f} fitas\nDistância estimada: {distance:.2f} cm")
