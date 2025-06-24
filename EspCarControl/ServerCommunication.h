@@ -9,8 +9,8 @@
 
 class ServerCommunication{
   private:
-    const char* ssid = "Camargo";
-    const char* password = "Soy5001150011@";
+    const char* ssid = "Motog84";
+    const char* password = "asuaal33";
 
     static WebServer* server;
     
