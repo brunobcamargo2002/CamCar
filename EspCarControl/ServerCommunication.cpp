@@ -19,6 +19,7 @@ void ServerCommunication::setup(){
   Serial.println(WiFi.localIP());
 
   server->on("/movement", HTTP_POST, handleMove);
+  server->on("/rotation", HTTP_POST, handleRotation);
 
   server->begin();
   Serial.println("Server initialized");
@@ -52,7 +53,36 @@ void ServerCommunication::handleMove(){
     }
 
     server->send(200, "application/json", "{\"status\":\"ok\"}");
-  } else {
+  }
+  else {
+    server->send(405, "text/plain", "Denied");
+  }
+}
+
+void ServerCommunication::handleRotation(){
+  if (server->method() == HTTP_POST) {
+    String body = server->arg("plain");
+
+    StaticJsonDocument<512> doc;
+    DeserializationError error = deserializeJson(doc, body);
+
+    if (error) {
+      Serial.print("Parse Error");
+      Serial.println(error.c_str());
+      server->send(400, "application/json", "{\"erro\":\"Invalid JSON\"}");
+      return;
+    }
+
+    if (doc.containsKey("angle")) {
+      int angle = doc["angle"];
+      //moveController->rotate(angle);
+
+    } else {
+      Serial.println("field away");
+    }
+    server->send(200, "application/json", "{\"status\":\"ok\"}");
+  }
+  else {
     server->send(405, "text/plain", "Denied");
   }
 }

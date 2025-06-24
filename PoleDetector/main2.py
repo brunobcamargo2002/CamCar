@@ -5,14 +5,16 @@
 #   sudo /opt/lampp/manager-linux-x64.run
 #=========================================================================================
 from time import sleep
-import LocationOrientation as l
-from Map import Map
+from math import ceil
+from LocationOrientation import findCarPosition, findCarPositionOrientation
+from Math import angleBetweenTwoPoints, distanceBetweenTwoPoints, euclideanDistance
+
 import CarRequests as cr
 import Constants as k
 
-"""
 trajetory = [(-1, 0), (1, 5), (2, 10)]
 missingPoints = trajetory[:]
+
 
 for idx, point in enumerate(trajetory):
     # Atualiza posição e orientação antes de começar a andar para o ponto
@@ -60,14 +62,17 @@ for idx, point in enumerate(trajetory):
 
     # Atualiza o ponto inicial para o próximo segmento da trajetória
     initialPoint = point
+
+
+
+
 """
+distance, thickness =  DistanceEstimatorClassifier(path)
 
-#ARQUIVO PARA TESTE DAS FUNÇÕES
-
-trajetory = []
-posicao_carrinho = l.getPosition()
-map = Map(k.POLES_COORDS, (posicao_carrinho, None), trajetory)
-while(True):
-    posicao_carrinho = l.getPosition()
-    if posicao_carrinho is not None:
-        map.updateCar((posicao_carrinho, None))
+if distance == None:
+    print("ERRO - Main - Não foi possível calcular a distância.")
+elif thickness == None:
+    print("ERRO - Main - Não foi possível calcular o número de faixas.")
+else:
+    print(f"Distância estimada: {distance:.2f} cm\nNúmero de faixas estimada: {thickness} faixas")
+"""

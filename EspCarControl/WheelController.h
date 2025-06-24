@@ -3,9 +3,10 @@
 
 #include <Arduino.h>
 
-#define PWM_FREQ 9000
+#define PWM_FREQ 5000
 #define PWM_RESOLUTION_BITS 8
 #define MAX_DUTY_CYCLE ((1 << PWM_RESOLUTION_BITS) - 1)
+
 
 enum MotorState {
   STOPPED,

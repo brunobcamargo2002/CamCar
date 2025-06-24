@@ -21,6 +21,7 @@ class ServerCommunication{
   private:
     void setup();
     static void handleMove();
+    static void handleRotation();
     
   public:
     void handleClient();

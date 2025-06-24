@@ -3,16 +3,17 @@ import Constants as k
 import CarRequests as cr
 from DistanceEstimatorClassifier import DistanceEstimatorClassifier
 from Math import angleBetweenTwoPoints
+import numpy as np
 
 
 # === FUNÇÕES PRINCIPAIS ===
 
-def findCarPosition(last_position):
+def findCarPosition():
     """
     Captura a posição atual do carrinho e retorna junto com o ângulo atual do objeto car.
     """
     pos = getPosition()
-    return (pos, last_position[1])
+    return pos
 
 
 def findCarPositionOrientation():
@@ -42,7 +43,7 @@ def getPosition():
     Para o carrinho, espera pelo período da foto, obtém distâncias e calcula coordenadas.
     """
     cr.Stop()
-    t.sleep(k.PHOTO_PERIOD + 1)
+    t.sleep(20)
 
     distances = findPoles()
     if distances is None:
@@ -53,33 +54,49 @@ def getPosition():
 
 
 def findPoles():
-    """
+    poles = {}
+    for cam in k.CAMS:
+        distance, thickness, average_ratio = DistanceEstimatorClassifier(cam)
+        if average_ratio is not None:  
+            poles[average_ratio] = distance 
+    if(len(poles) < 3):
+        print("Warning: Less than 3 poles detected.")
+        return None
+    distances = [distance for _, distance in sorted(poles.items(), key=lambda x: x[0])]
+    return distances
+
+"""
+def findPoles():
     Tenta identificar as distâncias aos três postes conhecidos.
-    """
+    
     distances = [None, None, None]
     found = 0
-    max_attempts = 5
+    max_attempts = 11
+    rotation_step = 30
+    total_rotation = 0
     attempts = 0
 
     while found < 3 and attempts < max_attempts:
+        t.sleep(k.PHOTO_PERIOD + 1)
         for cam in k.CAMS:
             distance, thickness = DistanceEstimatorClassifier(cam)
 
-            if distance is not None and thickness is not None:
+            if distance is not None or thickness is not None:
                 index = int(thickness)
                 if 0 <= index < 3 and distances[index] is None:
                     distances[index] = distance
                     found += 1
         attempts += 1
-        # TODO: Criar rotina de rotação caso não encontre postes
+        cr.rotation(rotation_step)
+        total_rotation = (total_rotation + rotation_step) % 360
 
+    cr.rotation(-total_rotation)
     if found < 3:
         print(f"Warning: Only found {found} poles after {attempts} attempts.")
         return None
 
     return distances
-
-
+"""
 def calculateCarCoordinates(poles, car_distances):
     """
     Calcula a posição do carrinho a partir das coordenadas dos postes e das distâncias medidas.
