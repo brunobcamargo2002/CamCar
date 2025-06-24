@@ -1,5 +1,6 @@
 #=========================================================================================
 #   COMANDOS PARA INICIAR SERVIDOR NO LINUX
+#   ip a ->Ver IP para configurar servidor.
 #   sudo systemctl stop apache2
 #   sudo /opt/lampp/lampp start
 #   sudo /opt/lampp/manager-linux-x64.run
@@ -63,6 +64,8 @@ for idx, point in enumerate(trajetory):
 """
 
 #ARQUIVO PARA TESTE DAS FUNÇÕES
+path = r"/opt/lampp/htdocs/ESP32CAM/captured_images/photo0.jpg"
+
 
 trajetory = []
 posicao_carrinho = l.getPosition()

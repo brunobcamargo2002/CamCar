@@ -11,7 +11,7 @@ E ILUMINAÇÃO
 """
 
 #========Parametros de Calibração(MAIS FREQUENTES)==========
-LIMIAR              = 45    #ELIMINAR RUIDO                 #(int): Valor de threshold para binarização (padrão: 55).
+LIMIAR              = 70    #ELIMINAR RUIDO                 #(int): Valor de threshold para binarização (padrão: 55).
 FOCAL_LENGTH_PX     = 1600  #CORREÇÃO CALCULO DISTÂNCIA     #(float): Distância focal da câmera em pixels (ajustada por calibração).    
 #========Parametros de Calibração(MENOS FREQUENTES)=========
 WINDOW_SIZE         = 25    #UNIR FAIXA                     #(int): Largura do lado da janela quadrada para fazer o fechamento morfologico.
@@ -24,9 +24,7 @@ THREE_STRIP_RATIO   = 0.43  #CLASSIFICAÇÃO ESPESSURA        #(int): Limite sup
 #RATIO = Y / X
 #==============Parametros do Mundo Real=====================
 INITIAL_REAL_HEIGHT_CM  = 49.5 #CARACTERISTICA POSTE       #(float): Altura real do padrão no poste (ex: 40 cm)
-ONE_BANDS_NUMBER        = 10   #CARACTERISTICA POSTE       #Numero de faixas do poste de espessura 1
-TWO_BANDS_NUMBER        =  8   #CARACTERISTICA POSTE       #Numero de faixas do poste de espessura 2
-THREE_BANDS_NUMBER      =  7   #CARACTERISTICA POSTE       #Numero de faixas do poste de espessura 3
+REAL_BANDS_NUMBER            = 7    #CARACTERISTICA POSTE       #Numero de faixas do poste.
 #===========================================================
 
 def DistanceEstimatorClassifier(path):
@@ -45,7 +43,7 @@ def DistanceEstimatorClassifier(path):
         thickness (str): Classificação da espessura das listras.
     """
 
-    filtered_contours = StripeDetector(path, ShowImageFlag = False)
+    filtered_contours = StripeDetector(path, ShowImageFlag = True)
 
     thickness, average_ratio= DistanceClassifier(filtered_contours)
 
@@ -78,7 +76,7 @@ def StripeDetector(img_path, ShowImageFlag = False):
 
     # Carrega a imagem, gira em 180 graus e converte para escala de cinza
     img = cv2.imread(img_path)
-    img_rotated = cv2.rotate(img, cv2.ROTATE_180)
+    img_rotated = img#cv2.rotate(img, cv2.ROTATE_180)
     gray = cv2.cvtColor(img_rotated, cv2.COLOR_BGR2GRAY)
 
     # Binariza invertendo (faixas pretas viram branco)
@@ -247,9 +245,7 @@ def DistanceEstimator(filtered_contours, thickness):
     """
 
     #================Parametros de Calibração===================
-    one_bands_number =  ONE_BANDS_NUMBER #Numero de faixas do poste de espessura 1
-    two_bands_number =  TWO_BANDS_NUMBER #Numero de faixas do poste de espessura 2
-    three_bands_number =  THREE_BANDS_NUMBER #Numero de faixas do poste de espessura 3
+    real_bands_number = REAL_BANDS_NUMBER #Numero de faixas do poste.
     initial_real_height_cm = INITIAL_REAL_HEIGHT_CM #(float): Altura real do padrão no poste (ex: 40 cm)
     focal_length_px = FOCAL_LENGTH_PX #(float): Distância focal da câmera em pixels (ajustada por calibração)
     #===========================================================
@@ -258,16 +254,6 @@ def DistanceEstimator(filtered_contours, thickness):
         print("ERRO - DistanceEstimator - Padrão não detectado com clareza.")
         return None
     else:
-
-        if thickness == 1:
-            real_bands_number = one_bands_number
-        elif thickness == 2:
-            real_bands_number = two_bands_number
-        elif thickness == 3:
-            real_bands_number = three_bands_number
-        else:
-            print("ERRO - DistanceEstimator - Numero Total de Faixas Não Iniciado.")
-            return None
 
         #Cacula altura ralativa caso o poste não apareca totalmente.
         captured_bands_nunber = len(filtered_contours)
