@@ -42,9 +42,10 @@ def getPosition():
     """
     Para o carrinho, espera pelo período da foto, obtém distâncias e calcula coordenadas.
     """
-    cr.Stop()
-    t.sleep(20)
-
+    
+    #cr.Stop()
+    #t.sleep(20)
+    print('aqui2')
     distances = findPoles()
     if distances is None:
         # TODO: Implementar estratégia quando não encontrar postes
@@ -57,7 +58,7 @@ def findPoles():
     poles = {}
     for cam in k.CAMS:
         distance, thickness, average_ratio = DistanceEstimatorClassifier(cam)
-        if average_ratio is not None:  
+        if average_ratio is not None and distance is not None:  
             poles[average_ratio] = distance 
     if(len(poles) < 3):
         print("Warning: Less than 3 poles detected.")

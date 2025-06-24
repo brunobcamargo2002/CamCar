@@ -43,7 +43,7 @@ def DistanceEstimatorClassifier(path):
         thickness (str): Classificação da espessura das listras.
     """
 
-    filtered_contours = StripeDetector(path, ShowImageFlag = True)
+    filtered_contours = StripeDetector(path, ShowImageFlag = False)
 
     thickness, average_ratio= DistanceClassifier(filtered_contours)
 

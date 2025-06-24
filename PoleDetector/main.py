@@ -10,6 +10,7 @@ import LocationOrientation as l
 from Map import Map
 import CarRequests as cr
 import Constants as k
+import matplotlib.pyplot as plt
 
 """
 trajetory = [(-1, 0), (1, 5), (2, 10)]
@@ -61,16 +62,30 @@ for idx, point in enumerate(trajetory):
 
     # Atualiza o ponto inicial para o próximo segmento da trajetória
     initialPoint = point
-"""
 
 #ARQUIVO PARA TESTE DAS FUNÇÕES
 path = r"/opt/lampp/htdocs/ESP32CAM/captured_images/photo0.jpg"
 
+while(True):
+    distance, thickness, average_ratio =  DistanceEstimatorClassifier(path)
+    sleep(5)
+"""
 
 trajetory = []
 posicao_carrinho = l.getPosition()
-map = Map(k.POLES_COORDS, (posicao_carrinho, None), trajetory)
 while(True):
-    posicao_carrinho = l.getPosition()
     if posicao_carrinho is not None:
-        map.updateCar((posicao_carrinho, None))
+        map = Map(k.POLES_COORDS, (posicao_carrinho, None), trajetory)
+    else:
+        print("Não foi possível criar o mapa. Posição do carrinho inválida.")
+
+    sleep(10)
+    #Show the map
+    plt.close()
+    plt.ion()
+    plt.show()
+    #input()
+#while(True):
+#    posicao_carrinho = l.getPosition()
+#    if posicao_carrinho is not None:
+#        map.updateCar((posicao_carrinho, None))

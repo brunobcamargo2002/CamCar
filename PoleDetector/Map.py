@@ -21,8 +21,8 @@ class Map:
         self._draw()
 
         # Show the map
-        plt.ion()
-        plt.show()
+        #plt.ion()
+        #plt.show()
 
     def _draw(self):
         self.ax.clear()
