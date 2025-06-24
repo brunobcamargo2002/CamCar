@@ -16,7 +16,7 @@ import Constants as k
 trajetory = [(-1, 0), (1, 5), (2, 10)]
 missingPoints = trajetory[:]
 
-
+"""
 for idx, point in enumerate(trajetory):
     # Atualiza posição e orientação antes de começar a andar para o ponto
     #carPosition = findCarPosition()
@@ -63,14 +63,12 @@ for idx, point in enumerate(trajetory):
 
     # Atualiza o ponto inicial para o próximo segmento da trajetória
     initialPoint = point
+"""
 
+#ARQUIVO PARA TESTE DAS FUNÇÕES
+path = r"/opt/lampp/htdocs/ESP32CAM/captured_images/ESP32CAMCap.jpg"
+
+while(True):
+    distance, thickness, average_ratio =  DistanceEstimatorClassifier(path)
+    sleep(5)
 #"""
-#    ARQUIVO PARA TESTE DAS FUNÇÕES
-#"""
-#
-#path = r"/opt/lampp/htdocs/ESP32CAM/captured_images/ESP32CAMCap.jpg"
-#
-#while(True):
-#    distance, thickness, average_ratio =  DistanceEstimatorClassifier(path)
-#    time.sleep(5)
-#
