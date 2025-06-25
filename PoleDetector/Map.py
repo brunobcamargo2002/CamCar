@@ -29,6 +29,38 @@ class Map:
         self.ax.set_aspect('equal')
         self.ax.grid(True)
 
+        #Pega posição do carro
+        (x, y), angle = self.CarPosition
+
+        for i, (px, py) in enumerate(self.Poles, start=1):
+            #self.ax.plot(px, py, 'ro', markersize=10)
+
+            # Calcular distância do carro até o poste
+            #dist = np.hypot(px - x, py - y)
+            #label = f"Poste {i}\n{dist:.1f} m"
+            #self.ax.text(px + 3, py + 3, label, color='red', fontsize=9)
+            self.ax.plot(px, py, 'ro', markersize=10)
+
+            # Linha entre o carro e o poste
+            self.ax.plot([x, px], [y, py], 'k--', linewidth=1)
+    
+            # Calcular distância
+            dist = np.hypot(px - x, py - y)
+    
+            # Ponto médio para posicionar o texto
+            mx = (x + px) / 2 + 3
+            my = (y + py) / 2 + 3
+    
+            # Texto da distância no meio da linha
+            label = f"{dist:.2f} cm"
+            self.ax.text(mx, my, label, color='black', fontsize=9, ha='center', va='bottom')
+    
+            # Nome do poste ao lado do ponto
+            self.ax.text(px + 3, py + 3, f"Poste {i}", color='red', fontsize=9)
+
+        # Draw car
+        self.ax.plot(x, y, 'go', markersize=8)
+
         # Draw poles
         for (x, y) in self.Poles:
             self.ax.plot(x, y, 'ro', markersize=10)
@@ -37,10 +69,6 @@ class Map:
         if len(self.Path) >= 2:
             xs, ys = zip(*self.Path)
             self.ax.plot(xs, ys, 'b-', linewidth=2)
-
-        # Draw car
-        (x, y), angle = self.CarPosition
-        self.ax.plot(x, y, 'go', markersize=8)
 
         # Draw car direction
         if angle is not None:
@@ -55,8 +83,8 @@ class Map:
         all_y = [p[1] for p in self.Poles] + [p[1] for p in self.Path] + [y]
 
         if all_x and all_y:
-            self.ax.set_xlim(min(all_x) - 1, max(all_x) + 1)
-            self.ax.set_ylim(min(all_y) - 1, max(all_y) + 1)
+            self.ax.set_xlim(min(all_x) - 30, max(all_x) + 30)
+            self.ax.set_ylim(min(all_y) - 30, max(all_y) + 30)
 
         # Update the plot
         self.fig.canvas.draw()
@@ -75,15 +103,18 @@ class Map:
 
 # Example usage
 if __name__ == "__main__":
-    poles = [(2, 3), (5, 5), (7, 2)]
-    car = ((1, 1), None)
-    path = [(1, 1), (2, 2), (3, 3), (6.2, 5.5)]
+    poles = [(120, 130), (15, 150), (70, 70)]
+    car = ((80, 120), None)
+    path = []#[(1, 1), (2, 2), (3, 3), (6.2, 5.5)]
 
     map_view = Map(poles, car, path)
 
+    plt.ion()
+    plt.show()
+    input()
     # Simulate car movement (path is fixed)
-    import time
-    for i in range(10):
-        new_pos = ((1 + i * 0.5, 1 + i * 0.3), None)
-        map_view.updateCar(new_pos)
-        time.sleep(0.5)
+    #import time
+    #for i in range(10):
+    #    new_pos = ((1 + i * 0.5, 1 + i * 0.3), None)
+    #    map_view.updateCar(new_pos)
+    #    time.sleep(0.5)

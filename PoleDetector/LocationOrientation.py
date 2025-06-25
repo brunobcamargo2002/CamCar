@@ -45,7 +45,7 @@ def getPosition():
     
     #cr.Stop()
     #t.sleep(20)
-    print('aqui2')
+    
     distances = findPoles()
     if distances is None:
         # TODO: Implementar estratégia quando não encontrar postes

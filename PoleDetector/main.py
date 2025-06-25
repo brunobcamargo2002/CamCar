@@ -79,7 +79,7 @@ while(True):
     else:
         print("Não foi possível criar o mapa. Posição do carrinho inválida.")
 
-    sleep(10)
+    #sleep(10)
     #Show the map
     plt.close()
     plt.ion()
