@@ -1,20 +1,26 @@
 import requests
 import time
 
+url = "http://192.168.33.185/movement"
 
-url = "http://192.168.187.185"
-mov_url = url + "/movement"
-rot_url = url + "/rotation"
-
-def Go():
+def Go(enableLeft, enableRight):
     dados = {
-        "leftDirection": 1,
-        "leftRPM": 1.0,
-        "rightDirection": 1,
-        "rightRPM": 1.0
+        "leftDirection": enableLeft,
+        "leftRPM": 0.8,
+        "rightDirection": enableRight,
+        "rightRPM": 0.8
     }
-    resposta = requests.post(mov_url, json=dados)
 
+    try:
+        resposta = requests.post(url, json=dados, timeout=2)
+        resposta.raise_for_status()
+        print("Comando enviado com sucesso.")
+    except requests.RequestException as e:
+        print("Erro ao enviar comando:", e)
+
+# Envia comandos
+
+'''
 def Stop():
     dados = {
         "leftDirection": 0,
@@ -29,3 +35,4 @@ def Rotate(degree):
         "rotation": degree
     }
     resposta = requests.post(rot_url, json=dados)
+'''

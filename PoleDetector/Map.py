@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 class Map:
-    def __init__(self, poles, car_position, path):
+    def __init__(self, poles, car_position, path, distance):
         """
         poles: list of tuples (x, y)
         car_position: ((x, y), angle) -- initial car position and direction in degrees
@@ -11,6 +11,7 @@ class Map:
         self.Poles = poles
         self.CarPosition = car_position
         self.Path = path
+        self.distance = distance
 
         # Set up the figure
         self.fig, self.ax = plt.subplots()
@@ -31,6 +32,9 @@ class Map:
 
         #Pega posição do carro
         (x, y), angle = self.CarPosition
+    
+        # Calcular distância
+        dist = self.distance    
 
         for i, (px, py) in enumerate(self.Poles, start=1):
             #self.ax.plot(px, py, 'ro', markersize=10)
@@ -44,15 +48,12 @@ class Map:
             # Linha entre o carro e o poste
             self.ax.plot([x, px], [y, py], 'k--', linewidth=1)
     
-            # Calcular distância
-            dist = np.hypot(px - x, py - y)
-    
             # Ponto médio para posicionar o texto
             mx = (x + px) / 2 + 3
             my = (y + py) / 2 + 3
     
             # Texto da distância no meio da linha
-            label = f"{dist:.2f} cm"
+            label = f"{dist[i-1]:.2f} cm"
             self.ax.text(mx, my, label, color='black', fontsize=9, ha='center', va='bottom')
     
             # Nome do poste ao lado do ponto
@@ -90,11 +91,12 @@ class Map:
         self.fig.canvas.draw()
         self.fig.canvas.flush_events()
 
-    def updateCar(self, new_position):
+    def updateCar(self, new_position, distance):
         """
         new_position: ((x, y), angle)
         """
         self.CarPosition = new_position
+        self.distance = distance
         self._draw()
 
     def update_path(self, new_path):

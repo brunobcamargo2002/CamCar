@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from screeninfo import get_monitors
 
 """
 ================ESTATÍSTICAS==================================================
@@ -11,10 +12,10 @@ E ILUMINAÇÃO
 """
 
 #========Parametros de Calibração(MAIS FREQUENTES)==========
-LIMIAR              = 70    #ELIMINAR RUIDO                 #(int): Valor de threshold para binarização (padrão: 55).
+LIMIAR              = 76    #ELIMINAR RUIDO                 #(int): Valor de threshold para binarização (padrão: 55).
 FOCAL_LENGTH_PX     = 1600  #CORREÇÃO CALCULO DISTÂNCIA     #(float): Distância focal da câmera em pixels (ajustada por calibração).    
 #========Parametros de Calibração(MENOS FREQUENTES)=========
-WINDOW_SIZE         = 25    #UNIR FAIXA                     #(int): Largura do lado da janela quadrada para fazer o fechamento morfologico.
+WINDOW_SIZE         = 2    #UNIR FAIXA                     #(int): Largura do lado da janela quadrada para fazer o fechamento morfologico.
 MIN_AREA            = 500   #ELIMINAR RUIDO                 #(float): Área mínima para considerar um contorno válido (padrão: 500).
 MAX_RATIO           = 1.0   #ELIMINAR RUIDO                 #(float): Proporção máxima entre altura e largura para considerar um contorno válido.
 MAX_X_DISTANCE      = 50    #ELIMINAR RUIDO                 #(float): Distância maxima entre os Xs centrais do agrupamento.
@@ -24,8 +25,11 @@ THREE_STRIP_RATIO   = 0.43  #CLASSIFICAÇÃO ESPESSURA        #(int): Limite sup
 #RATIO = Y / X
 #==============Parametros do Mundo Real=====================
 INITIAL_REAL_HEIGHT_CM  = 49.5 #CARACTERISTICA POSTE       #(float): Altura real do padrão no poste (ex: 40 cm)
-REAL_BANDS_NUMBER            = 7    #CARACTERISTICA POSTE       #Numero de faixas do poste.
+REAL_BANDS_NUMBER       = 7    #CARACTERISTICA POSTE       #Numero de faixas do poste.
 #===========================================================
+
+# Lista global para armazenar até 4 imagens
+image_stage_buffer = []
 
 def DistanceEstimatorClassifier(path):
     #=========================================
@@ -43,7 +47,7 @@ def DistanceEstimatorClassifier(path):
         thickness (str): Classificação da espessura das listras.
     """
 
-    filtered_contours = StripeDetector(path, ShowImageFlag = True)
+    filtered_contours = StripeDetector(path, ShowImageFlag = False)
 
     thickness, average_ratio= DistanceClassifier(filtered_contours)
 
@@ -205,6 +209,8 @@ def ShowImageStages(img, filtered_contours, candidate_contours, gray, thresh):
     A janela permanece aberta até ser fechada pelo usuário.
     """
 
+    global image_stage_buffer
+
     # Para mostrar contornos, vamos copiar a imagem original
     img_candidate_contours = img.copy()
     img_filtered_contours = img.copy()
@@ -220,17 +226,28 @@ def ShowImageStages(img, filtered_contours, candidate_contours, gray, thresh):
     # Agora juntamos as imagens horizontalmente
     side_by_side = np.hstack((img, gray_bgr, thresh_bgr, img_candidate_contours, img_filtered_contours))
 
-    # Ajuste a janela para caber
-    cv2.namedWindow('Etapas', cv2.WINDOW_NORMAL)
-    cv2.imshow('Etapas', side_by_side)
-    
-    #Espera fechar a janela
-    while True:
-        cv2.waitKey(100)# Espera 100ms para não travar a CPU
-        if cv2.getWindowProperty('Etapas', cv2.WND_PROP_VISIBLE) < 1:
-            break
+     # Adicionar ao buffer e limitar a 4 imagens
+    image_stage_buffer.append(side_by_side)
+    if len(image_stage_buffer) > 4:
+        image_stage_buffer.pop(0)  # Remove a mais antiga
 
-    cv2.destroyAllWindows() 
+    # Empilhar verticalmente
+    stacked = np.vstack(image_stage_buffer)
+
+    # Exibir janela
+    cv2.namedWindow('Etapas em Progresso', cv2.WINDOW_NORMAL)
+    monitor = get_monitors()[0]
+    cv2.resizeWindow('Etapas em Progresso', int((monitor.width)/2), int((monitor.height)/2))
+    cv2.imshow('Etapas em Progresso', stacked)
+    cv2.waitKey(1000)  # Atualiza a janela rapidamente sem travar o loop
+
+    #Espera fechar a janela
+    #while True:
+    #    cv2.waitKey(100)# Espera 100ms para não travar a CPU
+    #    if cv2.getWindowProperty('Etapas em Progresso', cv2.WND_PROP_VISIBLE) < 1:
+    #        break
+
+    #cv2.destroyAllWindows() 
 
 def DistanceEstimator(filtered_contours, thickness):
     """
