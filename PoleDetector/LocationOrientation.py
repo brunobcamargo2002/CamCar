@@ -49,9 +49,9 @@ def getPosition():
     distances = findPoles()
     if distances is None:
         # TODO: Implementar estratégia quando não encontrar postes
-        return None
+        return None, None
 
-    return calculateCarCoordinates(k.POLES_COORDS, distances)
+    return calculateCarCoordinates(k.POLES_COORDS, distances), distances 
 
 
 def findPoles():
