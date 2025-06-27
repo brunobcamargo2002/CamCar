@@ -1,33 +1,85 @@
 #include "MoveController.h"
 
-#define VELOCITY 0.8
+WheelController* MoveController::leftPtr = nullptr;
+WheelController* MoveController::rightPtr = nullptr;
 
 MoveController::MoveController(): 
-left(IN1, IN2, INA), right(IN3, IN4, INB){
+left(IN1, IN2, INA, 200), right(IN3, IN4, INB, 200){
+  leftPtr = &left;
+  rightPtr = &right;
+
+  attachInterrupt(digitalPinToInterrupt(ENCODER_LEFT), incrementTickLeft, FALLING);
+  attachInterrupt(digitalPinToInterrupt(ENCODER_RIGHT), incrementTickRight, FALLING);
 }
 
-void MoveController::moveLine(MotorState motorState){
-  left.setMove(motorState, VELOCITY);
-  right.setMove(motorState, VELOCITY);
+void MoveController::incrementTickLeft(){
+  if(leftPtr != nullptr)
+    leftPtr->incrementTick();
 }
 
-void MoveController::setWheelsMove(MotorState leftState, float leftRPM, MotorState rightState, float rightRPM){
-  left.setMove(leftState, VELOCITY);
-  right.setMove(rightState, VELOCITY);
+void MoveController::incrementTickRight(){
+  if(rightPtr != nullptr)
+    rightPtr->incrementTick();
+}
+unsigned long timeold = 0;
+void MoveController::processMove(){
+  if (millis() - timeold >= 300){
+    // unsigned long deltaTime = millis() - timeold;
+    detachInterrupt(ENCODER_LEFT);
+    detachInterrupt(ENCODER_RIGHT);
+    left.refreshRPM(millis() - timeold);
+    right.refreshRPM(millis() - timeold);
+    timeold = millis();
+
+    // Debug
+    // Serial.println("Left");
+    // Serial.print("Vel: ");
+    // Serial.print(left.currentPWM, 2);
+    // Serial.print("    ");
+    // Serial.print("RPM: ");
+    // Serial.println(left.RPM, 0);
+    
+    // Serial.println("Right");
+    // Serial.print("Vel: ");
+    // Serial.print(right.currentPWM, 2);
+    // Serial.print("    ");
+    // Serial.print("RPM: ");
+    // Serial.println(right.RPM, 0);
+    
+    attachInterrupt(ENCODER_LEFT, incrementTickLeft, FALLING);
+    attachInterrupt(ENCODER_RIGHT, incrementTickRight, FALLING);
+  }
+  left.computePWM();
+  right.computePWM();
 }
 
-void MoveController::rotate(float angle, float velocity) {
-  float duration = abs(angle) / velocity;
+void MoveController::moveLine(bool forward, float RPM){
+  left.setMove(forward, RPM);
+  right.setMove(forward, RPM);
+}
+
+void MoveController::moveLine(bool forward){
+  left.setMove(forward);
+  right.setMove(forward);
+}
+
+void MoveController::stop(){
+  left.stop();
+  right.stop();
+}
+
+void MoveController::rotate(float angle) {
+  float duration = abs(angle) / 60.0;
 
   unsigned long durationMs = (unsigned long)(duration * 1000);
 
   if (angle > 0) {
-    left.setMove(STOPPED, 0);
-    right.setMove(FORWARD, VELOCITY);
+    left.setMove(false, 255);
+    right.stop();
   } 
   else if (angle < 0) {
-    left.setMove(FORWARD, VELOCITY);
-    right.setMove(STOPPED, 0.0);
+    left.stop();
+    right.setMove(false, 255);
   } 
   else {
     return;
@@ -35,8 +87,8 @@ void MoveController::rotate(float angle, float velocity) {
 
   delay(durationMs);
 
-  left.setMove(STOPPED, 0.0);
-  right.setMove(STOPPED, 0.0);
+  left.stop();
+  right.stop();
 }
 
 MoveController::~MoveController(){

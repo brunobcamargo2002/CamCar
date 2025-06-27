@@ -2,30 +2,29 @@ import requests
 import time
 
 
-url = "http://192.168.187.185"
-mov_url = url + "/movement"
-rot_url = url + "/rotation"
+url = "http://192.168.137.251"
+line_url = url + "/line"
+stop_url = url + "/stop"
 
-def Go():
+def Go(forward):
     dados = {
-        "leftDirection": 1,
-        "leftRPM": 1.0,
-        "rightDirection": 1,
-        "rightRPM": 1.0
+        "forward": forward
     }
-    resposta = requests.post(mov_url, json=dados)
+    resposta = requests.post(line_url, json=dados)
 
 def Stop():
     dados = {
-        "leftDirection": 0,
-        "leftRPM": 0.0,
-        "rightDirection": 0,
-        "rightRPM": 0.0
     }
-    resposta = requests.post(mov_url, json=dados)
+    resposta = requests.post(stop_url, json=dados)
 
 def Rotate(degree):
     dados = {
         "rotation": degree
     }
     resposta = requests.post(rot_url, json=dados)
+
+if __name__ == "__main__":
+    Go(False)
+    print("Deu bom")
+    time.sleep(5)
+    Stop()

@@ -1,7 +1,8 @@
-#ifndef MOVE_CONTROLLER_H
+#ifndef MOVE_CONTROLLER_H                                                                                          
 #define MOVE_CONTROLLER_H
 
 #include "WheelController.h"
+
 #include <Arduino.h>
 
 #define INA 12
@@ -12,17 +13,29 @@
 #define IN3 5
 #define IN4 18
 
+#define ENCODER_LEFT 35
+#define ENCODER_RIGHT 34
+
 class MoveController{
   private:
     WheelController left, right;
     float angularVelocity = 10;
 
+    static WheelController* leftPtr;
+    static WheelController* rightPtr;
+
   public:
     MoveController();
 
-    void moveLine(MotorState motorState);
-    void setWheelsMove(MotorState leftState, float leftRPM, MotorState rightState, float rightRPM);
-    void rotate(float angle, float velocity);
+    void processMove();
+
+    void moveLine(bool forward, float RPM);
+    void moveLine(bool forward);
+    void stop();
+    void rotate(float angle);
+
+    void static incrementTickLeft();
+    void static incrementTickRight();
 
     ~MoveController();
 

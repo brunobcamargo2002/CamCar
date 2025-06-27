@@ -7,15 +7,20 @@ float velocidade = 1.0;
 void setup() {
   //moveController = new MoveController();
   //moveController->rotate(90);
-  //ServerCommunication::moveController = moveController;
-  //serverCommunication = new ServerCommunication();
+  ServerCommunication::moveController = moveController;
+  serverCommunication = new ServerCommunication();
+  Serial.begin(115200);
+  moveController->moveLine(true, 180);
 }
 
 void loop() {
-  //moveController->rotate(90, velocidade);
-  moveController->moveLine(FORWARD);
-  delay(3000);
-  //moveController->moveLine(STOPPED);
-  //delay(1000);
-  velocidade += 1;
+  serverCommunication->handleClient();
+  // moveController->processMove();
+  // moveController->moveLine(true);
+  // delay(2500);
+  // moveController->stop();
+  // moveController->moveLine(false);
+  // delay(8000);
+  // moveController->stop();
+  // delay(1000);
 }

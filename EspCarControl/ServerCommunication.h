@@ -9,8 +9,8 @@
 
 class ServerCommunication{
   private:
-    const char* ssid = "Motog84";
-    const char* password = "asuaal33";
+    const char* ssid = "PC_MIYAIJI 8457";
+    const char* password = "019283Th";
 
     static WebServer* server;
     
@@ -20,7 +20,8 @@ class ServerCommunication{
     
   private:
     void setup();
-    static void handleMove();
+    static void handleLine();
+    static void handleStop();
     static void handleRotation();
     
   public:

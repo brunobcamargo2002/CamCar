@@ -18,14 +18,15 @@ void ServerCommunication::setup(){
   Serial.println("Connected");
   Serial.println(WiFi.localIP());
 
-  server->on("/movement", HTTP_POST, handleMove);
+  server->on("/line", HTTP_POST, handleLine);
+  server->on("/stop", HTTP_POST, handleStop);
   server->on("/rotation", HTTP_POST, handleRotation);
 
   server->begin();
   Serial.println("Server initialized");
 }
 
-void ServerCommunication::handleMove(){
+void ServerCommunication::handleLine(){
   if (server->method() == HTTP_POST) {
     String body = server->arg("plain");
 
@@ -39,14 +40,10 @@ void ServerCommunication::handleMove(){
       return;
     }
 
-    if (doc.containsKey("leftDirection") && doc.containsKey("leftRPM") && doc.containsKey("rightDirection") && doc.containsKey("rightRPM")) {
-      MotorState leftDirection = doc["leftDirection"];
-      float leftRPM = doc["leftRPM"];
+    if (doc.containsKey("forward")) {
+      bool forward = doc["forward"];
 
-      MotorState rightDirection = doc["rightDirection"];
-      float rightRPM = doc["rightRPM"];
-
-      moveController->setWheelsMove(leftDirection, leftRPM, rightDirection, rightRPM);
+      moveController->moveLine(forward);
 
     } else {
       Serial.println("field away");
@@ -57,6 +54,17 @@ void ServerCommunication::handleMove(){
   else {
     server->send(405, "text/plain", "Denied");
   }
+}
+
+void ServerCommunication::handleStop(){
+  if (server->method() == HTTP_POST) {
+    moveController->stop();
+
+    server->send(200, "application/json", "{\"status\":\"ok\"}");
+  }
+  else {
+    server->send(405, "text/plain", "Denied");
+  } 
 }
 
 void ServerCommunication::handleRotation(){
