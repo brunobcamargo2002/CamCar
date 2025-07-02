@@ -81,9 +81,9 @@ void ServerCommunication::handleRotation(){
       return;
     }
 
-    if (doc.containsKey("angle")) {
-      int angle = doc["angle"];
-      //moveController->rotate(angle);
+    if (doc.containsKey("clockwise")) {
+      bool clockwise = doc["clockwise"];
+      moveController->rotate(clockwise);
 
     } else {
       Serial.println("field away");

@@ -1,4 +1,4 @@
-#include "WheelController.h"
+  #include "WheelController.h"
 
 WheelController::WheelController(unsigned int pinControl1, unsigned int pinControl2, unsigned int pinPWM, unsigned int pinEncoder)
   : pinControl1(pinControl1), pinControl2(pinControl2), pinPWM(pinPWM), pinEncoder(pinEncoder), countTicks(0), rpm_buffer_idx(0)
@@ -30,20 +30,27 @@ void WheelController::initPins(){
   ledcWrite(pinPWM, dutyCycle);
 }
 
+void WheelController::setSpeed(int dutyCycle){
+  this->dutyCycle = dutyCycle;
+  ledcWrite(pinPWM, dutyCycle);
+}
+
 void WheelController::setMove(bool forward, float targetRPM){
   this->motorState = (forward) ? MOTOR_FORWARD : MOTOR_BACKWARD;
   this->TargetRPM = targetRPM;
   refreshState();
 }
 
-void WheelController::setMove(bool forward){
+void WheelController::setMove(bool forward, int dutyCycle){
   this->motorState = (forward) ? MOTOR_FORWARD : MOTOR_BACKWARD;
+  dutyCycle = (dutyCycle == -1) ? this->dutyCycle : dutyCycle;
+  ledcWrite(pinPWM, dutyCycle);
   refreshState();
   gradualVelocity();
 }
 
 void WheelController::gradualVelocity() {
-  const int step = 10;                // incremento por passo
+  const int step = 5;                // incremento por passo
   const int delayMs = 3;            // atraso entre passos
 
   for (int duty = 100; duty <= dutyCycle; duty += step) {

@@ -5,8 +5,8 @@
 
 #include <Arduino.h>
 
-#define INA 12
-#define INB 13
+#define INA 25
+#define INB 33
 
 #define IN1 2
 #define IN2 4
@@ -32,7 +32,7 @@ class MoveController{
     void moveLine(bool forward, float RPM);
     void moveLine(bool forward);
     void stop();
-    void rotate(float angle);
+    void rotate(bool clockwise);
 
     void static incrementTickLeft();
     void static incrementTickRight();

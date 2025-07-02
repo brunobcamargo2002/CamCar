@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <PID_v1.h>
 
-#define PWM_FREQ 5000
+#define PWM_FREQ 9000
 #define PWM_RESOLUTION_BITS 8
 #define MIN_DUTY_CYCLE 0
 #define MAX_DUTY_CYCLE ((1 << PWM_RESOLUTION_BITS) - 1)
@@ -45,8 +45,10 @@ class WheelController {
 
     WheelController(unsigned int pinControl1, unsigned int pinControl2, unsigned int pinPWM, int dutyCycle);
 
+    void setSpeed(int dutyCycle);
+
     void setMove(bool forward, float targetRPM);
-    void setMove(bool forward);
+    void setMove(bool forward, int dutyCycle = -1);
     void gradualVelocity();
     void gradualRedution();
     void stop();

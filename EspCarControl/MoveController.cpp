@@ -4,7 +4,7 @@ WheelController* MoveController::leftPtr = nullptr;
 WheelController* MoveController::rightPtr = nullptr;
 
 MoveController::MoveController(): 
-left(IN1, IN2, INA, 200), right(IN3, IN4, INB, 200){
+left(IN1, IN2, INA, 210), right(IN4, IN3, INB, 210){
   leftPtr = &left;
   rightPtr = &right;
 
@@ -59,8 +59,16 @@ void MoveController::moveLine(bool forward, float RPM){
 }
 
 void MoveController::moveLine(bool forward){
+  left.setSpeed(210);
+  right.setSpeed(210);
   left.setMove(forward);
   right.setMove(forward);
+}
+
+void MoveController::rotate(bool clockwise){
+  right.setSpeed(190);
+
+  right.setMove(clockwise);
 }
 
 void MoveController::stop(){
@@ -68,6 +76,7 @@ void MoveController::stop(){
   right.stop();
 }
 
+/*
 void MoveController::rotate(float angle) {
   float duration = abs(angle) / 60.0;
 
@@ -90,6 +99,8 @@ void MoveController::rotate(float angle) {
   left.stop();
   right.stop();
 }
+*/
+
 
 MoveController::~MoveController(){
   
